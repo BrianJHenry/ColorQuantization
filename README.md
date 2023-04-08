@@ -7,6 +7,7 @@ It takes in images as .raw files and outputs their compressed versions as .bmp f
 ## Running Projectt
 
 The program requires 2 command-line arguments.
+
 Arg 0: 
 - The path (absolute or relative) to the .raw file you want compressed.
 - Note, in order to work properly, the .raw filenames have a specific naming convention as follows:
