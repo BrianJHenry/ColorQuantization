@@ -26,8 +26,20 @@ public class ColorReducer {
         this.paletteIndex = 0;
     }
         
+    //method that finds the needed depth of recursion and calls the recursive medianCut method.
+    public void medianCut() {
+
+        // sets a depth based on the number of colors needed in the palette
+        int depthOfRecursion = colorDepth();
+
+        // original call of the main recursive algorithm
+        medianCut(0, RGBArray.length - 1, depthOfRecursion);
+
+        fillOutPalette();
+    }
+
     // recursive method to progressively cut the color space in half along the channel with the widest value range
-    public void medianCut(int startIndex, int endIndex, int depthOfRecursion) {
+    private void medianCut(int startIndex, int endIndex, int depthOfRecursion) {
 
         // base case
         if (depthOfRecursion <= 0) {
@@ -58,6 +70,17 @@ public class ColorReducer {
         medianCut(middle + 1, endIndex, depthOfRecursion - 1);
     }
 
+    //method to compute the power of 2 that the number of colors is equivalent to (ex. 8 returns 3, 32 returns 5)
+    private int colorDepth() {
+        int numColors = numberOfColors;
+        int depthNum = 0;
+        while (numColors > 1) {
+            numColors = numColors / 2;
+            depthNum ++;
+        }
+        return depthNum;
+    }
+
     // method to access output color palette
     public RGB[] getColorPalette() {
         return colorPalette;
@@ -66,17 +89,6 @@ public class ColorReducer {
     // method to
     public int getPaletteIndex() {
         return paletteIndex;
-    }
-
-    //computes the power of 2 that the number of colors is equivalent to (ex. 8 returns 3, 32 returns 5)
-    public int colorDepth() {
-        int numColors = numberOfColors;
-        int depthNum = 0;
-        while (numColors > 1) {
-            numColors = numColors / 2;
-            depthNum ++;
-        }
-        return depthNum;
     }
 
     // method to find maximum value for the specified color channel
@@ -204,11 +216,9 @@ public class ColorReducer {
 
     // method to fill out any spots in the palette that may have been left unfilled
     // prevents crashes if the original .raw image had fewer colors than were specified to be used in the palette
-    public void fillOutPalette() {
-        for (int i = 0; i < numberOfColors; i++) {
-            if (colorPalette[i] == null) {
-                colorPalette[i] = new RGB(0, 0, 0);
-            }
+    private void fillOutPalette() {
+        for (int i = paletteIndex; i < numberOfColors; i++) {
+            colorPalette[i] = new RGB(0, 0, 0);
         }
     }
 }
