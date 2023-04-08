@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "App",
             "projectName": "ColorQuantization_378016ae",
-            "args": ["./input/Flags_600x400.raw", "8-16"]
+            "args": ["./input/RedBird2_600x400.raw", "8-32"]
         }
     ]
 }

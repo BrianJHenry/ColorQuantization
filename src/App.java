@@ -25,9 +25,11 @@ public class App {
      * Instantiates object of ColorReducer class and reduces colors down to desired palette
      * Writes output to .bmp file
      * Args:
-     * path to .raw file, palette size (number or range)
+     * path to .raw file, palette size (number or range in form: small-large)
      */
     public static void main(String[] args) throws Exception {
+
+        System.out.println();
 
         if (args.length != 2) {
             System.out.println("Please re-run with the correct number of arguments.");
@@ -35,7 +37,7 @@ public class App {
             return;
         }
 
-        // path of the input directory or file
+        // path of the input file
         String path = args[0];
 
         // number or range for the palette size (note: input integer(s) should be powers of 2)
@@ -51,10 +53,12 @@ public class App {
                 sizeInt = Integer.parseInt(stringSize);
             } catch (Exception e) {
                 System.out.println("Please enter an integer (int) or range of integers (int-int) as the second argument.");
+                System.out.println();
                 return;
             }
             if (!checkIsPower(sizeInt, 2)) {
                 System.out.println("Please enter power(s) of 2 as the second argument.");
+                System.out.println();
                 return;
             }
             paletteSizeArray[i] = sizeInt;
@@ -63,6 +67,7 @@ public class App {
         if (paletteSizeArray.length == 2) {
             if (paletteSizeArray[0] > paletteSizeArray[1]) {
                 System.out.println("Please enter a range where the first integer is less than or equal to the second.");
+                System.out.println();
                 return;
             }
         }
@@ -77,18 +82,21 @@ public class App {
         String[] splitExtension = filename.split("\\.",2);
         if ((splitExtension.length == 1) ||  !splitExtension[splitExtension.length-1].equals("raw")) {
             System.out.println("Please enter a path with file ending in .raw extension.");
+            System.out.println();
             return;
         }
         String[] splitDimensions = splitExtension[0].split("_",2);
         if (splitDimensions.length != 2) {
             System.out.println("Please enter enter a path with file in the format: path/name_widthxheight.raw.");
             System.out.println("Where width and height are numbers specifying the width and height of the .raw file in the filename.");
+            System.out.println();
             return;
         }
         String[] splitWH = splitDimensions[1].split("x",2);
         if (splitWH.length != 2) {
             System.out.println("Please enter enter a path with file in the format: path/name_widthxheight.raw.");
             System.out.println("Where width and height are numbers specifying the width and height of the .raw file in the filename.");
+            System.out.println();
             return;
         }
         int width;
@@ -99,6 +107,7 @@ public class App {
         } catch (Exception e) {
             System.out.println("Please enter enter a path with file in the format: path/name_widthxheight.raw.");
             System.out.println("Where width and height are numbers specifying the width and height of the .raw file in the filename.");
+            System.out.println();
             return;
         }
 
@@ -132,10 +141,15 @@ public class App {
         // for each palette size specified in the range, perform medianCut algorithm and output to .bmp file
         for (int numColors = paletteSizeArray[0]; numColors <= paletteSizeArray[paletteSizeArray.length-1]; numColors *= 2){
 
+            // prints filename and number of colors for current iteration
+            System.out.println("+-----------------------------------------------------+");
+            String execFilenamePrint = String.format("| Executing on %-38s |", filename);
+            System.out.println(execFilenamePrint);
+            String numberColorsPrint = String.format("| Number of colors: %-34d|", numColors);
+            System.out.println(numberColorsPrint);
+
             //creates median cutter object
             ColorReducer colorPaletteFinder = new ColorReducer(container, numColors);
-
-            System.out.println();
 
             long startTime = System.nanoTime();
 
@@ -145,42 +159,40 @@ public class App {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
 
-            System.out.println("Total execution time of medianCut in milliseconds: " + timeElapsed / 1000000);
-
+            // prints execution time of color reduction algorithm
+            String execTime = "Execution time of medianCut in milliseconds: " + (timeElapsed / 1000000);
+            String execTimePrint = String.format("| %-52s|", execTime);
+            System.out.println(execTimePrint);
+            System.out.println("+-----------------------------------------------------+");
             System.out.println();
 
-            System.out.println("Number of colors found: " + (colorPaletteFinder.getPaletteIndex()));
 
-            //retrieves the color table
+            // lines 172 - 192 assign each pixel in the original image to a color from the palette
+
+            // retrieves the color table
             RGB[] palette = colorPaletteFinder.getColorPalette();
-
-            //allocate 2d array to contain color info relating pixels with location to color palette
+            // allocate 2d array to contain color info relating pixels to color palette
             int [][] condensedPixelArray = new int[height][width];
-
-            //loop through the original 2d pixel array
+            // loop through the original 2d pixel array
             for (int h = 0; h < height; h++) {
                 for (int w = 0; w < width; w++) {
-
-                    //set starting index of the minimum mean squared distance
+                    // set starting index within the palette array of the minimum mean squared distance
                     int minIndex = 0;
-
-                    //loop through the color palette to find the minimum mean squared distance for the current pixel
+                    // loop through the color palette to find the closest color for the current pixel
                     for (i = 1; i < numColors; i++) {
-
-                        //checks if the min mean sqd distance of the current color in color palette is smaller than the current smallest found so far
+                        // checks if the min mean sqd distance of the current color in color palette is smaller than the current smallest found so far
                         if (pixelArray[h][w].meanSqdDist(palette[i]) < pixelArray[h][w].meanSqdDist(palette[minIndex])) {
-
-                            //if smaller then changes the minIndex to be the current index
+                            // if smaller then changes the minIndex to be the current index in the color palette
                             minIndex = i;
                         }
                     }
-                    //once the whole palette has been cycled through assigns the minimum sqd distance to the pixel location
+                    // once the whole palette has been cycled through assigns the minimum sqd distance to the pixel location
                     condensedPixelArray[h][w] = minIndex;
-
                 }
             }
 
-            String outputFilePath = "./output/" + splitDimensions[0] + "_" + Integer.toString(numColors) + ".bmp";
+            // specifies output file path
+            String outputFilePath = "./output/" + splitDimensions[0] + "_" + Integer.toString(numColors) + "colors.bmp";
 
             //calls method to write data to the bmp file
             BMPWriter outWriter = new BMPWriter(); 
