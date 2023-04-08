@@ -4,7 +4,7 @@ This is a Java implementation of the median cut algorithm to perform color quant
 It compresses images via a reduction of the color space of the image.
 It takes in images as .raw files and outputs their compressed versions as .bmp files.
 
-## Running Projectt
+## Running Project
 
 The program requires 2 command-line arguments.
 
